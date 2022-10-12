@@ -51,26 +51,112 @@ wd <- getwd()
 #File name:
 file_response <- file.path(wd,'response_all.parquet')
 file_survey <- file.path(wd,'survey_all.csv')
+file_sentiment <- file.path(wd,"sentiment_score.csv")
 
 #File:
 response <- clean_names(read_parquet(file_response, as_tibble = TRUE))
 survey <- clean_names(read_csv(file_survey))
+sentiment <- clean_names(read_csv(file_sentiment))
+
+glimpse(response)
+
 
 #EDA####
+
+response%>%
+  keep(is.numeric) %>% 
+  gather() %>% 
+  ggplot(aes(value)) +
+  facet_wrap(~ key, scales = "free") +
+  geom_histogram()
+
 #old version
 eda_report(response, output_dir = ".", output_format="html")
 
-#remove variables with only NA
-response <- select(response, -resp_image, -resp_dmg_school_leaver)
 #change logical to character
-
 response$resp_dmg_scholarship <- as.character(response$resp_dmg_scholarship)
-response$resp_import_batch <- as.character(response$resp_import_batch)
 
+#stepwise adding/removing variables to run EDA report
 
-eda_web_report(response, output_dir = ".",
-               author = "Deena Iamsiri", output_file = "Response.html",
+resp_eda <- select(response,
+                   resp_id,
+                   resp_survey_id,
+                   resp_q_id,
+                   resp_points,
+                   -resp_comment,
+                   resp_majors,
+                   -resp_image,
+                   resp_teacher_id,
+                   -resp_teacher_incorrect,
+                   resp_date,
+                   resp_course,
+                   resp_fieldofstudy,
+                   -resp_import_batch,
+                   resp_form_key,
+                   resp_dmg_gender,
+                   resp_dmg_age,
+                   resp_dmg_indigenous,
+                   resp_dmg_cob,
+                   resp_dmg_citizen,
+                   resp_dmg_language,
+                   resp_dmg_home,
+                   resp_dmg_term,
+                   resp_dmg_ses,
+                   resp_dmg_basis_of_adm,
+                   resp_dmg_liability_cat,
+                   resp_dmg_int_attend_type,
+                   resp_dmg_commencing,
+                   resp_dmg_course_campus,
+                   resp_dmg_sp_adm_scheme,
+                   resp_dmg_scholarship,
+                   resp_dmg_mode_of_attend,
+                   resp_dmg_school_leaver,
+                   resp_dmg_uac_preference,
+                   resp_dmg_atar_on_adm,
+                   resp_dmg_previous_credit,
+                   resp_dmg_previous_insti,
+                   resp_dmg_student_comm_yr,
+                   resp_dmg_grad_lvl,
+                   resp_student_id_hash,
+                   -resp_comment_hidden)
+
+eda_web_report(resp_eda, output_dir = ".",
+               author = "Deena Iamsiri", output_file = "Response_no_comment.html",
                theme = "blue", browse = TRUE)
+glimpse(resp_eda)
+
+resp_eda$resp_points <- as.factor(resp_eda$resp_points)
+resp_eda$resp_majors <- as.factor(resp_eda$resp_majors)
+resp_eda$resp_course <- as.factor(resp_eda$resp_course)
+resp_eda$resp_fieldofstudy <- as.factor(resp_eda$resp_fieldofstudy)
+resp_eda$resp_form_key <- as.factor(resp_eda$resp_form_key)
+resp_eda$resp_dmg_gender <- as.factor(resp_eda$resp_dmg_gender)
+resp_eda$resp_dmg_indigenous <- as.factor(resp_eda$resp_dmg_indigenous)
+resp_eda$resp_dmg_cob <- as.factor(resp_eda$resp_dmg_cob)
+resp_eda$resp_dmg_citizen <- as.factor(resp_eda$resp_dmg_citizen)
+resp_eda$resp_dmg_language <- as.factor(resp_eda$resp_dmg_language)
+resp_eda$resp_dmg_home <- as.factor(resp_eda$resp_dmg_home)
+resp_eda$resp_dmg_term <- as.factor(resp_eda$resp_dmg_term)
+resp_eda$resp_dmg_ses <- as.factor(resp_eda$resp_dmg_ses)
+resp_eda$resp_dmg_liability_cat <- as.factor(resp_eda$resp_dmg_liability_cat)
+resp_eda$resp_dmg_int_attend_type <- as.factor(resp_eda$resp_dmg_int_attend_type)
+resp_eda$resp_dmg_commencing <- as.factor(resp_eda$resp_dmg_commencing)
+resp_eda$resp_dmg_course_campus <- as.factor(resp_eda$resp_dmg_course_campus)
+resp_eda$resp_dmg_sp_adm_scheme <- as.factor(resp_eda$resp_dmg_sp_adm_scheme)
+resp_eda$resp_dmg_scholarship <- as.factor(resp_eda$resp_dmg_scholarship)
+resp_eda$resp_dmg_mode_of_attend <- as.factor(resp_eda$resp_dmg_mode_of_attend)
+resp_eda$resp_dmg_school_leaver <- as.factor(resp_eda$resp_dmg_school_leaver)
+resp_eda$resp_dmg_previous_insti <- as.factor(resp_eda$resp_dmg_previous_insti)
+resp_eda$resp_dmg_student_comm_yr <- as.factor(resp_eda$resp_dmg_student_comm_yr)
+resp_eda$resp_dmg_grad_lvl <- as.factor(resp_eda$resp_dmg_grad_lvl)
+
+
+eda_web_report(resp_eda, output_dir = ".",
+               author = "Deena Iamsiri", output_file = "Response_factor.html",
+               theme = "blue", browse = TRUE)
+
+#old version
+eda_report(resp_eda, output_dir = ".", output_format="html")
 
 #old version
 eda_report(survey, output_dir = ".", output_format="html")
@@ -99,4 +185,5 @@ eda_web_report(survey, output_dir = ".",
 ##Review and format data ####
 glimpse(response)
 glimpse(survey)
+
 
